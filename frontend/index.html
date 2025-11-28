@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Hotel - Home</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h2>🏨 Happy Hotel</h2>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="index.html" class="active">Home</a></li>
+                <li><a href="pages/rooms.html">Rooms</a></li>
+                <li id="myBookingsNav" style="display: none;"><a href="pages/my-bookings.html">My Bookings</a></li>
+                <li id="adminNav" style="display: none;"><a href="admin/admin-dashboard.html">Admin</a></li>
+                <li id="loginNav"><a href="pages/login.html">Login</a></li>
+                <li id="registerNav"><a href="pages/register.html">Register</a></li>
+                <li id="userNav" style="display: none;">
+                    <span id="userName"></span>
+                    <button onclick="logout()" class="btn-logout">Logout</button>
+                </li>
+                <li>
+                    <div class="theme-toggle" onclick="toggleDarkMode()">
+                        <div class="theme-toggle-slider">☀️</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="overlay"></div>
+        <div class="hero-content">
+            <h1>Welcome to Happy Hotel</h1>
+            <p>Experience luxury, comfort, and elegance at every stay.</p>
+            <a href="pages/rooms.html" class="btn btn-primary">Browse Rooms</a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <h2>Why Choose Us</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🌟</div>
+                    <h3>Luxury Rooms</h3>
+                    <p>Premium rooms with world-class amenities</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🍽️</div>
+                    <h3>Fine Dining</h3>
+                    <p>Exquisite cuisine from renowned chefs</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🏊</div>
+                    <h3>Recreation</h3>
+                    <p>Pool, spa, and fitness facilities</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Secure Booking</h3>
+                    <p>Safe and encrypted reservation system</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about">
+        <div class="container">
+            <h2>About Happy Hotel</h2>
+            <p>We are committed to providing you with an unforgettable experience. Our hotel combines modern luxury with warm hospitality, ensuring every guest feels at home.</p>
+            <p>Book your perfect room today and enjoy exclusive benefits and world-class service.</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Happy Hotel. All rights reserved.</p>
+            <p>Contact: info@happyhotel.com | Phone: +1-234-567-8900</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        // Check authentication status on page load
+        checkAuth();
+    </script>
+</body>
+</html>

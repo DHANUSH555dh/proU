@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Hotel Booking</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h2>🏨 Happy Hotel</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="rooms.html">Rooms</a></li>
+                <li><a href="login.html" class="active">Login</a></li>
+                <li><a href="register.html">Register</a></li>
+                <li>
+                    <div class="theme-toggle" onclick="toggleDarkMode()">
+                        <div class="theme-toggle-slider">☀️</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Login Section -->
+    <section class="auth-section">
+        <div class="container">
+            <div class="auth-card">
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🔐</div>
+                    <h1>Login to Your Account</h1>
+                    <p class="auth-subtitle">Welcome back! Please login to continue.</p>
+                </div>
+                
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" placeholder="Enter your email" required autocomplete="email">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" placeholder="Enter your password" required autocomplete="current-password">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <span>Login</span>
+                    </button>
+                </form>
+                
+                <p class="auth-switch">
+                    Don't have an account? <a href="register.html" style="color: var(--primary-color); font-weight: 600;">Register here</a>
+                </p>
+
+                <div class="demo-credentials" style="margin-top: 2rem; padding: 1.5rem; background: var(--bg-secondary); border-radius: 8px; border-left: 4px solid var(--primary-color);">
+                    <h4 style="margin-bottom: 1rem; color: var(--text-primary);">Demo Credentials:</h4>
+                    <p style="margin: 0.5rem 0; color: var(--text-secondary);"><strong style="color: var(--text-primary);">Admin:</strong> admin@hotel.com / admin123</p>
+                    <p style="margin: 0.5rem 0; color: var(--text-secondary);"><strong style="color: var(--text-primary);">Customer:</strong> john@example.com / customer123</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Happy Hotel. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="../script.js"></script>
+    <script>
+        // Redirect if already logged in
+        const token = localStorage.getItem('token');
+        if (token) {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (user.role === 'admin') {
+                window.location.href = '../admin/admin-dashboard.html';
+            } else {
+                window.location.href = '../index.html';
+            }
+        }
+    </script>
+</body>
+</html>

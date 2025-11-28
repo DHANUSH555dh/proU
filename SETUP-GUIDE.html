@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Booking System - Setup Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #2563eb;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        .section {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2563eb;
+        }
+        .section h2 {
+            color: #1e40af;
+            margin-bottom: 15px;
+        }
+        .step {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .step-number {
+            display: inline-block;
+            background: #2563eb;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        code {
+            background: #1e293b;
+            color: #10b981;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .code-block {
+            background: #1e293b;
+            color: #10b981;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .warning {
+            background: #fef3c7;
+            border-left-color: #f59e0b;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #f59e0b;
+        }
+        .success {
+            background: #d1fae5;
+            border-left-color: #10b981;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #10b981;
+        }
+        .file-list {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .file-list li {
+            margin: 5px 0;
+            color: #334155;
+        }
+        .btn {
+            display: inline-block;
+            background: #2563eb;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            margin: 5px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            background: #1e40af;
+            transform: translateY(-2px);
+        }
+        .btn-success {
+            background: #10b981;
+        }
+        .btn-success:hover {
+            background: #059669;
+        }
+        .center {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .emoji {
+            font-size: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏨 Hotel Booking System</h1>
+        <p class="subtitle">Complete Full-Stack Project Setup Guide</p>
+
+        <div class="success">
+            <strong>✅ Project Generated Successfully!</strong><br>
+            All 24 files have been created and are ready to use.
+        </div>
+
+        <div class="section">
+            <h2>📋 Quick Setup (5 Steps)</h2>
+            
+            <div class="step">
+                <span class="step-number">1</span>
+                <strong>Install Dependencies</strong>
+                <div class="code-block">
+cd backend
+npm install
+                </div>
+                <small>Or double-click <code>install.bat</code> in project root</small>
+            </div>
+
+            <div class="step">
+                <span class="step-number">2</span>
+                <strong>Configure MongoDB</strong>
+                <p>Create <code>.env</code> file in backend folder:</p>
+                <div class="code-block">
+MONGODB_URI=your_mongodb_uri_here
+JWT_SECRET=anyRandomString123
+PORT=5000
+NODE_ENV=development
+FRONTEND_URL=http://localhost:5500
+                </div>
+            </div>
+
+            <div class="step">
+                <span class="step-number">3</span>
+                <strong>Start Backend Server</strong>
+                <div class="code-block">
+cd backend
+npm start
+                </div>
+                <small>Or double-click <code>start-backend.bat</code></small>
+            </div>
+
+            <div class="step">
+                <span class="step-number">4</span>
+                <strong>Start Frontend</strong>
+                <p>Right-click <code>frontend/index.html</code> → Open with Live Server</p>
+            </div>
+
+            <div class="step">
+                <span class="step-number">5</span>
+                <strong>Access Application</strong>
+                <p>Open browser: <code>http://localhost:5500</code></p>
+            </div>
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ Important!</strong><br>
+            You MUST add your MongoDB Atlas URI to the <code>.env</code> file before starting the backend.
+            <br><br>
+            Don't have MongoDB? <a href="https://www.mongodb.com/cloud/atlas" target="_blank">Get it free here</a>
+        </div>
+
+        <div class="section">
+            <h2>📁 Project Structure</h2>
+            <div class="file-list">
+                <strong>Backend Files (11):</strong>
+                <ul>
+                    <li>✅ server.js - Express server</li>
+                    <li>✅ package.json - Dependencies</li>
+                    <li>✅ models/ - User, Room, Booking schemas</li>
+                    <li>✅ routes/ - Auth, Rooms, Bookings APIs</li>
+                    <li>✅ .env.example - Environment template</li>
+                </ul>
+                <br>
+                <strong>Frontend Files (8):</strong>
+                <ul>
+                    <li>✅ index.html - Home page</li>
+                    <li>✅ styles.css - Complete styling</li>
+                    <li>✅ script.js - All functionality</li>
+                    <li>✅ pages/ - Rooms, Login, Register, My Bookings</li>
+                    <li>✅ admin/ - Dashboard, Add Room, Manage Bookings</li>
+                </ul>
+                <br>
+                <strong>Helper Files (5):</strong>
+                <ul>
+                    <li>✅ README.md - Full documentation</li>
+                    <li>✅ QUICKSTART.md - Quick guide</li>
+                    <li>✅ PROJECT-SUMMARY.md - Project overview</li>
+                    <li>✅ install.bat - Auto installer</li>
+                    <li>✅ start-backend.bat - Backend launcher</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎯 Features Included</h2>
+            <div class="file-list">
+                <strong>User Features:</strong>
+                <ul>
+                    <li>✅ Registration & Login with JWT</li>
+                    <li>✅ Browse & Filter Rooms</li>
+                    <li>✅ View Room Details</li>
+                    <li>✅ Book Rooms with Date Selection</li>
+                    <li>✅ View & Cancel Bookings</li>
+                </ul>
+                <br>
+                <strong>Admin Features:</strong>
+                <ul>
+                    <li>✅ Dashboard with Statistics</li>
+                    <li>✅ Add, Edit, Delete Rooms</li>
+                    <li>✅ View All Bookings</li>
+                    <li>✅ Manage Room Availability</li>
+                </ul>
+                <br>
+                <strong>Security:</strong>
+                <ul>
+                    <li>✅ Password Hashing (bcrypt)</li>
+                    <li>✅ JWT Authentication</li>
+                    <li>✅ Role-Based Access Control</li>
+                    <li>✅ CORS Protection</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="center">
+            <h2>📚 Documentation</h2>
+            <a href="QUICKSTART.md" class="btn">Quick Start Guide</a>
+            <a href="README.md" class="btn">Full Documentation</a>
+            <a href="PROJECT-SUMMARY.md" class="btn">Project Summary</a>
+        </div>
+
+        <div class="center">
+            <h2>🚀 Launch Scripts</h2>
+            <p>Double-click these files to run:</p>
+            <div style="margin-top: 15px;">
+                <code>install.bat</code> - Install dependencies<br>
+                <code>check-setup.bat</code> - Check configuration<br>
+                <code>start-backend.bat</code> - Start server
+            </div>
+        </div>
+
+        <div class="success center">
+            <div class="emoji">🎉</div>
+            <h2>You're All Set!</h2>
+            <p>Your complete Hotel Room Booking System is ready to use.</p>
+            <p>Just configure MongoDB and start the servers!</p>
+            <br>
+            <a href="frontend/index.html" class="btn btn-success">Open Frontend →</a>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px; color: #64748b; font-size: 0.9rem;">
+            <p>Hotel Booking System v1.0.0</p>
+            <p>Built with ❤️ using Node.js, Express, MongoDB, and Vanilla JavaScript</p>
+        </div>
+    </div>
+</body>
+</html>

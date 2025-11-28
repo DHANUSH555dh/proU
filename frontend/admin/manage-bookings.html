@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Bookings - Admin</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h2>🏨 Happy Hotel - Admin</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="admin-dashboard.html">Dashboard</a></li>
+                <li><a href="add-room.html">Add Room</a></li>
+                <li><a href="manage-bookings.html" class="active">Bookings</a></li>
+                <li id="userNav">
+                    <span id="userName"></span>
+                    <button onclick="logout()" class="btn-logout">Logout</button>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="page-header manage-bookings-banner">
+        <div class="banner-overlay"></div>
+        <div class="container">
+            <h1>Manage Bookings</h1>
+            <p>View and manage all hotel bookings</p>
+        </div>
+    </section>
+
+    <!-- Filter Section -->
+    <section class="filter-section">
+        <div class="container">
+            <div class="filters">
+                <select id="statusFilter" onchange="filterBookings()">
+                    <option value="">All Status</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="pending">Pending</option>
+                    <option value="cancelled">Cancelled</option>
+                    <option value="completed">Completed</option>
+                </select>
+                <button onclick="loadAllBookings()" class="btn btn-secondary">Refresh</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bookings Table -->
+    <section class="admin-section">
+        <div class="container">
+            <div id="bookingsTable">
+                <div class="loading">Loading bookings...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Booking Details Modal -->
+    <div id="bookingDetailsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeBookingDetailsModal()">&times;</span>
+            <h2>Booking Details</h2>
+            <div id="bookingDetailsContent"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Happy Hotel. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="../script.js"></script>
+    <script>
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        let allBookings = [];
+
+        // Check if user is admin
+        if (!token || user.role !== 'admin') {
+            alert('Admin access required');
+            window.location.href = '../pages/login.html';
+        } else {
+            checkAuth();
+            loadAllBookings();
+        }
+
+        async function loadAllBookings() {
+            try {
+                const response = await fetch(`${API_URL}/bookings`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                allBookings = await response.json();
+                displayBookings(allBookings);
+            } catch (error) {
+                console.error('Error loading bookings:', error);
+                document.getElementById('bookingsTable').innerHTML = 
+                    '<p class="error-message">Error loading bookings</p>';
+            }
+        }
+
+        function filterBookings() {
+            const status = document.getElementById('statusFilter').value;
+            
+            if (status === '') {
+                displayBookings(allBookings);
+            } else {
+                const filtered = allBookings.filter(b => b.status === status);
+                displayBookings(filtered);
+            }
+        }
+
+        function displayBookings(bookings) {
+            const bookingsTable = document.getElementById('bookingsTable');
+
+            if (bookings.length === 0) {
+                bookingsTable.innerHTML = '<p>No bookings found.</p>';
+                return;
+            }
+
+            bookingsTable.innerHTML = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Guest</th>
+                            <th>Room</th>
+                            <th>Check-In</th>
+                            <th>Check-Out</th>
+                            <th>Guests</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${bookings.map(booking => {
+                            const checkIn = new Date(booking.checkIn).toLocaleDateString();
+                            const checkOut = new Date(booking.checkOut).toLocaleDateString();
+                            
+                            let statusClass = 'status-confirmed';
+                            if (booking.status === 'cancelled') statusClass = 'status-cancelled';
+                            else if (booking.status === 'pending') statusClass = 'status-pending';
+                            else if (booking.status === 'completed') statusClass = 'status-completed';
+
+                            return `
+                                <tr>
+                                    <td>${booking._id.substring(0, 8)}...</td>
+                                    <td>${booking.userId?.name || 'N/A'}<br><small>${booking.userId?.email || ''}</small></td>
+                                    <td>Room ${booking.roomId?.roomNumber || 'N/A'} (${booking.roomId?.type || 'Unknown'})</td>
+                                    <td>${checkIn}</td>
+                                    <td>${checkOut}</td>
+                                    <td>${booking.guests}</td>
+                                    <td>$${booking.totalPrice}</td>
+                                    <td><span class="status-badge ${statusClass}">${booking.status}</span></td>
+                                    <td>
+                                        <button onclick='viewBookingDetails(${JSON.stringify(booking)})' class="btn btn-small btn-secondary">View</button>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function viewBookingDetails(booking) {
+            const checkIn = new Date(booking.checkIn).toLocaleDateString();
+            const checkOut = new Date(booking.checkOut).toLocaleDateString();
+            const createdAt = new Date(booking.createdAt).toLocaleString();
+
+            const content = `
+                <div class="booking-details-view">
+                    <p><strong>Booking ID:</strong> ${booking._id}</p>
+                    <p><strong>Guest Name:</strong> ${booking.userId?.name || 'N/A'}</p>
+                    <p><strong>Guest Email:</strong> ${booking.userId?.email || 'N/A'}</p>
+                    <p><strong>Room Number:</strong> ${booking.roomId?.roomNumber || 'N/A'}</p>
+                    <p><strong>Room Type:</strong> ${booking.roomId?.type || 'Unknown'}</p>
+                    <p><strong>Check-In:</strong> ${checkIn}</p>
+                    <p><strong>Check-Out:</strong> ${checkOut}</p>
+                    <p><strong>Number of Guests:</strong> ${booking.guests}</p>
+                    <p><strong>Total Price:</strong> $${booking.totalPrice}</p>
+                    <p><strong>Status:</strong> ${booking.status}</p>
+                    <p><strong>Booked On:</strong> ${createdAt}</p>
+                </div>
+            `;
+
+            document.getElementById('bookingDetailsContent').innerHTML = content;
+            document.getElementById('bookingDetailsModal').style.display = 'block';
+        }
+
+        function closeBookingDetailsModal() {
+            document.getElementById('bookingDetailsModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

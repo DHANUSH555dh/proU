@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings - Hotel Booking</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h2>🏨 Happy Hotel</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="rooms.html">Rooms</a></li>
+                <li id="myBookingsNav"><a href="my-bookings.html" class="active">My Bookings</a></li>
+                <li id="adminNav" style="display: none;"><a href="../admin/admin-dashboard.html">Admin</a></li>
+                <li id="loginNav" style="display: none;"><a href="login.html">Login</a></li>
+                <li id="registerNav" style="display: none;"><a href="register.html">Register</a></li>
+                <li id="userNav" style="display: none;">
+                    <span id="userName"></span>
+                    <button onclick="logout()" class="btn-logout">Logout</button>
+                </li>
+                <li>
+                    <div class="theme-toggle" onclick="toggleDarkMode()">
+                        <div class="theme-toggle-slider">☀️</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="page-header bookings-banner">
+        <div class="banner-overlay"></div>
+        <div class="container">
+            <h1>My Bookings</h1>
+            <p>View and manage your hotel reservations</p>
+        </div>
+    </section>
+
+    <!-- Bookings Section -->
+    <section class="bookings-section">
+        <div class="container">
+            <div id="bookingsList">
+                <div class="loading">Loading your bookings...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content modal-small">
+            <h3>Cancel Booking?</h3>
+            <p>Are you sure you want to cancel this booking?</p>
+            <div class="modal-actions">
+                <button onclick="confirmCancelBooking()" class="btn btn-danger">Yes, Cancel</button>
+                <button onclick="closeConfirmModal()" class="btn btn-secondary">No, Keep It</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Happy Hotel. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="../script.js"></script>
+    <script>
+        let bookingToCancel = null;
+
+        // Check authentication and load bookings
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+        if (!token) {
+            alert('Please login to view your bookings');
+            window.location.href = 'login.html';
+        } else if (user.role === 'admin') {
+            alert('Admin users cannot access My Bookings. Redirecting to Admin Dashboard.');
+            window.location.href = '../admin/admin-dashboard.html';
+        } else {
+            checkAuth();
+            loadMyBookings();
+        }
+
+        function showCancelModal(bookingId) {
+            bookingToCancel = bookingId;
+            document.getElementById('confirmModal').style.display = 'block';
+        }
+
+        function closeConfirmModal() {
+            bookingToCancel = null;
+            document.getElementById('confirmModal').style.display = 'none';
+        }
+
+        async function confirmCancelBooking() {
+            if (!bookingToCancel) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/bookings/${bookingToCancel}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAlert('Booking cancelled successfully', 'success');
+                    closeConfirmModal();
+                    
+                    // Update UI in real-time without reloading
+                    updateBookingCardUI(bookingToCancel, 'cancelled');
+                } else {
+                    showAlert(data.message || 'Failed to cancel booking', 'error');
+                }
+            } catch (error) {
+                console.error('Error cancelling booking:', error);
+                showAlert('Error cancelling booking. Please try again.', 'error');
+            }
+        }
+
+        function updateBookingCardUI(bookingId, newStatus) {
+            const bookingCard = document.querySelector(`[data-booking-id="${bookingId}"]`);
+            if (bookingCard) {
+                // Update status badge
+                const statusBadge = bookingCard.querySelector('.booking-status');
+                if (statusBadge) {
+                    statusBadge.textContent = newStatus;
+                    statusBadge.className = `booking-status status-${newStatus}`;
+                }
+                
+                // Remove cancel button
+                const cancelBtn = bookingCard.querySelector('.cancel-btn');
+                if (cancelBtn) {
+                    cancelBtn.remove();
+                }
+                
+                // Add cancelled notice
+                const bookingActions = bookingCard.querySelector('.booking-actions');
+                if (bookingActions && newStatus === 'cancelled') {
+                    bookingActions.innerHTML = '<span class="cancelled-notice">Booking has been cancelled</span>';
+                }
+            }
+        }
+
+        async function loadMyBookings() {
+            try {
+                const response = await fetch(`${API_URL}/bookings/user/${user.id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const bookings = await response.json();
+
+                const bookingsList = document.getElementById('bookingsList');
+
+                if (!response.ok) {
+                    bookingsList.innerHTML = `<p class="error-message">${bookings.message || 'Failed to load bookings'}</p>`;
+                    return;
+                }
+
+                if (bookings.length === 0) {
+                    bookingsList.innerHTML = `
+                        <div class="empty-state">
+                            <h3>No Bookings Yet</h3>
+                            <p>You haven't made any bookings yet.</p>
+                            <a href="rooms.html" class="btn btn-primary">Browse Rooms</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                bookingsList.innerHTML = bookings.map(booking => {
+                    const checkIn = new Date(booking.checkIn);
+                    const checkOut = new Date(booking.checkOut);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    checkIn.setHours(0, 0, 0, 0);
+
+                    let statusClass = 'status-confirmed';
+                    let statusText = booking.status;
+                    if (booking.status === 'cancelled') {
+                        statusClass = 'status-cancelled';
+                        statusText = 'Cancelled';
+                    } else if (checkOut < new Date()) {
+                        statusClass = 'status-completed';
+                        statusText = 'Completed';
+                    } else {
+                        statusText = 'Confirmed';
+                    }
+
+                    const canCancel = booking.status === 'confirmed' && checkIn >= today;
+
+                    return `
+                        <div class="booking-card" data-booking-id="${booking._id}">
+                            <div class="booking-header">
+                                <h3>Room ${booking.roomId?.roomNumber || 'N/A'} - ${booking.roomId?.type || 'Unknown'}</h3>
+                                <span class="booking-status ${statusClass}">${statusText}</span>
+                            </div>
+                            <div class="booking-details">
+                                <div class="booking-info-grid">
+                                    <div class="info-item">
+                                        <strong>Check-In:</strong> ${checkIn.toLocaleDateString()}
+                                    </div>
+                                    <div class="info-item">
+                                        <strong>Check-Out:</strong> ${checkOut.toLocaleDateString()}
+                                    </div>
+                                    <div class="info-item">
+                                        <strong>Guests:</strong> ${booking.guests}
+                                    </div>
+                                    <div class="info-item">
+                                        <strong>Total Price:</strong> $${booking.totalPrice}
+                                    </div>
+                                    <div class="info-item">
+                                        <strong>Booking Code:</strong> ${booking.bookingCode || 'N/A'}
+                                    </div>
+                                    <div class="info-item">
+                                        <strong>Booked On:</strong> ${new Date(booking.createdAt).toLocaleDateString()}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="booking-actions">
+                                ${canCancel ? `
+                                    <button onclick="showCancelModal('${booking._id}')" class="cancel-btn">
+                                        <span class="btn-icon">✕</span> Cancel Booking
+                                    </button>
+                                ` : booking.status === 'cancelled' ? `
+                                    <span class="cancelled-notice">Booking has been cancelled</span>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error loading bookings:', error);
+                document.getElementById('bookingsList').innerHTML = 
+                    '<p class="error-message">Error loading bookings. Please try again.</p>';
+            }
+        }
+    </script>
+</body>
+</html>

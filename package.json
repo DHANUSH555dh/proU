@@ -1,0 +1,25 @@
+{
+  "name": "happy-hotel-booking-system",
+  "version": "1.0.0",
+  "description": "Complete Hotel Room Booking System with Features Editor",
+  "scripts": {
+    "start": "cd backend && npm start",
+    "build": "cd backend && npm install",
+    "dev": "cd backend && npm run dev",
+    "seed": "cd backend && npm run seed",
+    "install-deps": "cd backend && npm install"
+  },
+  "keywords": [
+    "hotel",
+    "booking",
+    "room-features",
+    "express",
+    "mongodb",
+    "vercel"
+  ],
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

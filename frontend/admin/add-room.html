@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Room - Admin</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h2>🏨 Happy Hotel - Admin</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="admin-dashboard.html">Dashboard</a></li>
+                <li><a href="add-room.html" class="active">Add Room</a></li>
+                <li><a href="manage-bookings.html">Bookings</a></li>
+                <li id="userNav">
+                    <span id="userName"></span>
+                    <button onclick="logout()" class="btn-logout">Logout</button>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="page-header add-room-banner">
+        <div class="banner-overlay"></div>
+        <div class="container">
+            <h1>Add New Room</h1>
+            <p>Create a new room listing</p>
+        </div>
+    </section>
+
+    <!-- Add Room Form -->
+    <section class="form-section">
+        <div class="container">
+            <div class="form-card">
+                <form id="addRoomForm" onsubmit="handleAddRoom(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="roomNumber">Room Number: *</label>
+                            <input type="number" id="roomNumber" min="1" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="type">Room Type: *</label>
+                            <select id="type" required>
+                                <option value="">Select Type</option>
+                                <option value="Single">Single</option>
+                                <option value="Double">Double</option>
+                                <option value="Suite">Suite</option>
+                                <option value="Deluxe">Deluxe</option>
+                                <option value="Presidential">Presidential</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="price">Price per Night ($): *</label>
+                            <input type="number" id="price" min="0" step="0.01" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="capacity">Capacity (guests): *</label>
+                            <input type="number" id="capacity" min="1" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="description">Description: *</label>
+                        <textarea id="description" rows="5" placeholder="Enter room description..." required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="images">Image URLs (comma-separated):</label>
+                        <input type="text" id="images" placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg">
+                        <small>Enter multiple image URLs separated by commas</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="amenities">Amenities (comma-separated):</label>
+                        <input type="text" id="amenities" placeholder="WiFi, TV, Air Conditioning, Mini Bar">
+                        <small>Enter amenities separated by commas</small>
+                    </div>
+                    
+                    <!-- Room Features Selection -->
+                    <div class="features-selection">
+                        <h4>Room Features</h4>
+                        <div id="featuresCheckboxGrid" class="features-checkbox-grid">
+                            <!-- Features will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="available" checked>
+                            Room Available for Booking
+                        </label>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Add Room</button>
+                        <a href="admin-dashboard.html" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Happy Hotel. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="../script.js"></script>
+    <script>
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+        // Check if user is admin
+        if (!token || user.role !== 'admin') {
+            alert('Admin access required');
+            window.location.href = '../pages/login.html';
+        } else {
+            checkAuth();
+            loadFeatures();
+        }
+
+        async function loadFeatures() {
+            try {
+                const response = await fetch(`${API_URL}/features`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const features = await response.json();
+                    renderFeaturesCheckboxes(features.filter(f => f.isActive));
+                } else {
+                    console.error('Failed to load features');
+                }
+            } catch (error) {
+                console.error('Error loading features:', error);
+            }
+        }
+
+        function renderFeaturesCheckboxes(features) {
+            const grid = document.getElementById('featuresCheckboxGrid');
+            
+            if (features.length === 0) {
+                grid.innerHTML = '<p style="color: var(--text-secondary); font-style: italic;">No features available. Add features in the dashboard first.</p>';
+                return;
+            }
+
+            grid.innerHTML = features.map(feature => `
+                <div class="feature-checkbox" onclick="toggleFeature(this, '${feature._id}')">
+                    <input type="checkbox" name="features" value="${feature._id}" onchange="event.stopPropagation();">
+                    <span class="feature-checkbox-icon">${feature.icon}</span>
+                    <span class="feature-checkbox-label">${feature.name}</span>
+                </div>
+            `).join('');
+        }
+
+        function toggleFeature(element, featureId) {
+            const checkbox = element.querySelector('input[type="checkbox"]');
+            checkbox.checked = !checkbox.checked;
+            element.classList.toggle('selected', checkbox.checked);
+        }
+
+        async function handleAddRoom(event) {
+            event.preventDefault();
+
+            const imagesInput = document.getElementById('images').value;
+            const amenitiesInput = document.getElementById('amenities').value;
+            
+            // Get selected features
+            const selectedFeatures = Array.from(document.querySelectorAll('input[name="features"]:checked'))
+                .map(checkbox => checkbox.value);
+
+            const roomData = {
+                roomNumber: parseInt(document.getElementById('roomNumber').value),
+                type: document.getElementById('type').value,
+                price: parseFloat(document.getElementById('price').value),
+                capacity: parseInt(document.getElementById('capacity').value),
+                description: document.getElementById('description').value,
+                images: imagesInput ? imagesInput.split(',').map(url => url.trim()) : [],
+                amenities: amenitiesInput ? amenitiesInput.split(',').map(a => a.trim()) : [],
+                features: selectedFeatures,
+                available: document.getElementById('available').checked
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/rooms`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(roomData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAlert('Room added successfully!', 'success');
+                    document.getElementById('addRoomForm').reset();
+                    setTimeout(() => {
+                        window.location.href = 'admin-dashboard.html';
+                    }, 1500);
+                } else {
+                    showAlert(data.message || 'Failed to add room', 'error');
+                }
+            } catch (error) {
+                console.error('Error adding room:', error);
+                showAlert('Error adding room. Please try again.', 'error');
+            }
+        }
+    </script>
+</body>
+</html>

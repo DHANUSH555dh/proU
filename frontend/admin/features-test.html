@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room Features Test - Happy Hotel</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        .test-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .test-section {
+            margin: 2rem 0;
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+        }
+        
+        .test-result {
+            margin: 1rem 0;
+            padding: 1rem;
+            border-radius: 6px;
+            font-family: monospace;
+        }
+        
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h2>🏨 Happy Hotel - Room Features Test</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="admin-dashboard.html">Dashboard</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="test-container">
+            <h1>🧪 Room Features Editor System Test</h1>
+            <p>This page tests all components of the Room Features Editor system.</p>
+            
+            <!-- Login Test -->
+            <div class="test-section">
+                <h3>1. Admin Login Test</h3>
+                <button onclick="testLogin()" class="btn btn-primary">Test Login</button>
+                <div id="loginResult" class="test-result" style="display:none;"></div>
+            </div>
+            
+            <!-- Features API Test -->
+            <div class="test-section">
+                <h3>2. Features API Test</h3>
+                <button onclick="testFeaturesAPI()" class="btn btn-primary">Test Features API</button>
+                <div id="featuresResult" class="test-result" style="display:none;"></div>
+            </div>
+            
+            <!-- UI Components Test -->
+            <div class="test-section">
+                <h3>3. UI Components Test</h3>
+                <button onclick="testUIComponents()" class="btn btn-primary">Test UI Components</button>
+                <div id="uiResult" class="test-result" style="display:none;"></div>
+            </div>
+            
+            <!-- Features Display Test -->
+            <div class="test-section">
+                <h3>4. Features Display Test</h3>
+                <div class="features-display-grid">
+                    <div class="feature-display-item">
+                        <span class="feature-display-icon">📶</span>
+                        <span class="feature-display-name">Premium WiFi</span>
+                    </div>
+                    <div class="feature-display-item">
+                        <span class="feature-display-icon">🏞️</span>
+                        <span class="feature-display-name">Balcony</span>
+                    </div>
+                    <div class="feature-display-item">
+                        <span class="feature-display-icon">🛁</span>
+                        <span class="feature-display-name">Jacuzzi</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Manual Features Management -->
+            <div class="test-section">
+                <h3>5. Manual Features Management</h3>
+                <button onclick="openManualFeaturesModal()" class="btn btn-secondary" style="background: var(--orange-color); color: white;">
+                    🏷️ Open Features Manager
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manual Features Modal (same as admin dashboard) -->
+    <div id="manualFeaturesModal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2>🏷️ Room Features Manager</h2>
+                <span class="close" onclick="closeManualFeaturesModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <!-- Add New Feature Form -->
+                <div class="feature-form-section">
+                    <h3>Add New Feature</h3>
+                    <form id="manualAddFeatureForm" onsubmit="handleManualAddFeature(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="manualFeatureName">Feature Name *</label>
+                                <input type="text" id="manualFeatureName" required placeholder="e.g., WiFi, Air Conditioning">
+                            </div>
+                            <div class="form-group">
+                                <label for="manualFeatureIcon">Icon *</label>
+                                <input type="text" id="manualFeatureIcon" required placeholder="🏊 (emoji)" maxlength="4">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="manualFeatureDescription">Description</label>
+                            <input type="text" id="manualFeatureDescription" placeholder="Brief description of the feature">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Feature</button>
+                    </form>
+                </div>
+
+                <!-- Existing Features List -->
+                <div class="features-list-section">
+                    <h3>Existing Features</h3>
+                    <div id="manualFeaturesList">
+                        <div class="loading">Loading features...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../script.js"></script>
+    <script>
+        const API_URL = 'http://localhost:5000/api';
+        let testToken = null;
+
+        async function testLogin() {
+            const resultDiv = document.getElementById('loginResult');
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = 'Testing login...';
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'admin@hotel.com',
+                        password: 'admin123'
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    testToken = data.token;
+                    resultDiv.className = 'test-result success';
+                    resultDiv.textContent = `✅ Login successful! Token: ${testToken.substring(0, 20)}...`;
+                } else {
+                    const error = await response.json();
+                    resultDiv.className = 'test-result error';
+                    resultDiv.textContent = `❌ Login failed: ${error.message}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'test-result error';
+                resultDiv.textContent = `❌ Login error: ${error.message}`;
+            }
+        }
+
+        async function testFeaturesAPI() {
+            const resultDiv = document.getElementById('featuresResult');
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = 'Testing Features API...';
+
+            if (!testToken) {
+                resultDiv.className = 'test-result error';
+                resultDiv.textContent = '❌ Please run login test first';
+                return;
+            }
+
+            try {
+                // Test GET features
+                const getResponse = await fetch(`${API_URL}/features`, {
+                    headers: { 'Authorization': `Bearer ${testToken}` }
+                });
+
+                if (getResponse.ok) {
+                    const features = await getResponse.json();
+                    resultDiv.className = 'test-result success';
+                    resultDiv.textContent = `✅ Features API working! Found ${features.length} features`;
+                } else {
+                    resultDiv.className = 'test-result error';
+                    resultDiv.textContent = `❌ Features API failed: ${getResponse.status}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'test-result error';
+                resultDiv.textContent = `❌ Features API error: ${error.message}`;
+            }
+        }
+
+        function testUIComponents() {
+            const resultDiv = document.getElementById('uiResult');
+            resultDiv.style.display = 'block';
+            
+            // Check if key elements exist
+            const checks = [
+                { name: 'Features display grid CSS', test: () => document.querySelector('.features-display-grid') !== null },
+                { name: 'Feature display item CSS', test: () => document.querySelector('.feature-display-item') !== null },
+                { name: 'Modal CSS', test: () => document.querySelector('.modal') !== null },
+                { name: 'Button styles', test: () => document.querySelector('.btn') !== null }
+            ];
+
+            let passedTests = 0;
+            let results = [];
+
+            checks.forEach(check => {
+                try {
+                    if (check.test()) {
+                        results.push(`✅ ${check.name}`);
+                        passedTests++;
+                    } else {
+                        results.push(`❌ ${check.name}`);
+                    }
+                } catch (error) {
+                    results.push(`❌ ${check.name}: ${error.message}`);
+                }
+            });
+
+            if (passedTests === checks.length) {
+                resultDiv.className = 'test-result success';
+            } else {
+                resultDiv.className = 'test-result error';
+            }
+            
+            resultDiv.innerHTML = results.join('<br>');
+        }
+
+        function openManualFeaturesModal() {
+            document.getElementById('manualFeaturesModal').style.display = 'block';
+            loadManualFeatures();
+        }
+
+        function closeManualFeaturesModal() {
+            document.getElementById('manualFeaturesModal').style.display = 'none';
+        }
+
+        async function loadManualFeatures() {
+            const featuresList = document.getElementById('manualFeaturesList');
+            
+            if (!testToken) {
+                featuresList.innerHTML = '<p style="color: red;">Please run login test first</p>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/features`, {
+                    headers: { 'Authorization': `Bearer ${testToken}` }
+                });
+
+                if (response.ok) {
+                    const features = await response.json();
+                    
+                    if (features.length === 0) {
+                        featuresList.innerHTML = '<p>No features found. Add some features below.</p>';
+                        return;
+                    }
+
+                    featuresList.innerHTML = `
+                        <div class="features-grid">
+                            ${features.map(feature => `
+                                <div class="feature-item ${feature.isActive ? '' : 'inactive'}">
+                                    <div class="feature-info">
+                                        <div class="feature-icon">${feature.icon}</div>
+                                        <div class="feature-details">
+                                            <strong>${feature.name}</strong>
+                                            <small>${feature.description || 'No description'}</small>
+                                        </div>
+                                    </div>
+                                    <div class="feature-actions">
+                                        <span class="status-badge ${feature.isActive ? 'status-available' : 'status-unavailable'}">
+                                            ${feature.isActive ? 'Active' : 'Inactive'}
+                                        </span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                } else {
+                    featuresList.innerHTML = '<p style="color: red;">Failed to load features</p>';
+                }
+            } catch (error) {
+                featuresList.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+
+        async function handleManualAddFeature(event) {
+            event.preventDefault();
+
+            if (!testToken) {
+                alert('Please run login test first');
+                return;
+            }
+
+            const featureData = {
+                name: document.getElementById('manualFeatureName').value,
+                icon: document.getElementById('manualFeatureIcon').value,
+                description: document.getElementById('manualFeatureDescription').value
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/features`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${testToken}`
+                    },
+                    body: JSON.stringify(featureData)
+                });
+
+                if (response.ok) {
+                    alert('Feature added successfully!');
+                    document.getElementById('manualAddFeatureForm').reset();
+                    await loadManualFeatures();
+                } else {
+                    const error = await response.json();
+                    alert(`Failed to add feature: ${error.message}`);
+                }
+            } catch (error) {
+                alert(`Error adding feature: ${error.message}`);
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('manualFeaturesModal');
+            if (event.target === modal) {
+                closeManualFeaturesModal();
+            }
+        }
+    </script>
+</body>
+</html>

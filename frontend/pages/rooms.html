@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Rooms - Happy Hotel</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h2>🏨 Happy Hotel</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="rooms.html" class="active">Rooms</a></li>
+                <li id="myBookingsNav" style="display: none;"><a href="my-bookings.html">My Bookings</a></li>
+                <li id="adminNav" style="display: none;"><a href="../admin/admin-dashboard.html">Admin</a></li>
+                <li id="loginNav"><a href="login.html">Login</a></li>
+                <li id="registerNav"><a href="register.html">Register</a></li>
+                <li id="userNav" style="display: none;">
+                    <span id="userName"></span>
+                    <button onclick="logout()" class="btn-logout">Logout</button>
+                </li>
+                <li>
+                    <div class="theme-toggle" onclick="toggleDarkMode()">
+                        <div class="theme-toggle-slider">☀️</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="page-header rooms-banner">
+        <div class="banner-overlay"></div>
+        <div class="container">
+            <h1>Available Rooms</h1>
+            <p>Choose from our selection of premium rooms</p>
+        </div>
+    </section>
+
+    <!-- Filter Section -->
+    <section class="filter-section">
+        <div class="container">
+            <div class="filters">
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Search rooms..." oninput="searchRooms()">
+                </div>
+                <select id="typeFilter" onchange="applyFilters()">
+                    <option value="">All Room Types</option>
+                    <option value="Single">Single</option>
+                    <option value="Double">Double</option>
+                    <option value="Suite">Suite</option>
+                    <option value="Deluxe">Deluxe</option>
+                    <option value="Presidential">Presidential</option>
+                </select>
+                <select id="priceFilter" onchange="applyFilters()">
+                    <option value="">All Prices</option>
+                    <option value="0-100">$0 - $100</option>
+                    <option value="100-200">$100 - $200</option>
+                    <option value="200-500">$200 - $500</option>
+                    <option value="500+">$500+</option>
+                </select>
+                <button onclick="resetFilters()" class="btn btn-secondary">Clear Filters</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Rooms Grid -->
+    <section class="rooms-section">
+        <div class="container">
+            <div id="roomsGrid" class="rooms-grid">
+                <div class="loading">Loading rooms...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Room Details Modal -->
+    <div id="roomModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeRoomModal()">&times;</span>
+            <div id="roomDetails"></div>
+        </div>
+    </div>
+
+    <!-- Booking Modal -->
+    <div id="bookingModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeBookingModal()">&times;</span>
+            <h2>Book Room</h2>
+            <div class="booking-instructions" style="margin-bottom: 1.5rem; padding: 15px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #2563eb;">
+                <p style="margin: 0; color: #1e40af; font-size: 0.9em;">
+                    ℹ️ <strong>Booking Info:</strong> You can book for multiple consecutive nights. Minimum stay: 1 night, Maximum stay: 30 nights.
+                </p>
+            </div>
+            <form id="bookingForm" onsubmit="handleBooking(event)">
+                <input type="hidden" id="bookRoomId">
+                <div class="form-group">
+                    <label for="checkIn">Check-In Date: <small style="color: #64748b;">(Arrival day)</small></label>
+                    <input type="date" id="checkIn" required>
+                </div>
+                <div class="form-group">
+                    <label for="checkOut">Check-Out Date: <small style="color: #64748b;">(Departure day)</small></label>
+                    <input type="date" id="checkOut" required>
+                    <small style="color: #64748b; display: block; margin-top: 5px;">Must be at least 1 day after check-in</small>
+                </div>
+                <div class="form-group">
+                    <label for="guests">Number of Guests:</label>
+                    <input type="number" id="guests" min="1" required>
+                </div>
+                <div class="form-group">
+                    <div id="priceCalculation"></div>
+                </div>
+                <button type="submit" class="btn btn-primary">Confirm Booking</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Happy Hotel. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="../script.js"></script>
+    <script>
+        // Load rooms on page load
+        checkAuth();
+        loadRooms();
+
+        // Set minimum date to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('checkIn').setAttribute('min', today);
+        document.getElementById('checkOut').setAttribute('min', today);
+
+        // Update checkout min date when checkin changes
+        document.getElementById('checkIn').addEventListener('change', function() {
+            const checkInDate = new Date(this.value);
+            // Set checkout minimum to the day after check-in
+            const nextDay = new Date(checkInDate);
+            nextDay.setDate(nextDay.getDate() + 1);
+            const minCheckOut = nextDay.toISOString().split('T')[0];
+            document.getElementById('checkOut').setAttribute('min', minCheckOut);
+            
+            // Clear checkout if it's now invalid
+            const currentCheckOut = document.getElementById('checkOut').value;
+            if (currentCheckOut && new Date(currentCheckOut) <= checkInDate) {
+                document.getElementById('checkOut').value = '';
+            }
+        });
+    </script>
+</body>
+</html>
