@@ -72,6 +72,9 @@
 
     <script src="../script.js"></script>
     <script>
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:5000/api'
+            : '/api';
         let bookingToCancel = null;
 
         // Check authentication and load bookings

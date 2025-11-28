@@ -19,16 +19,16 @@ const corsOptions = {
     'http://127.0.0.1:5500',
     'http://localhost:3000',
     'http://127.0.0.1:3000',
-    process.env.FRONTEND_URL
+    'http://localhost:5000',
+    process.env.FRONTEND_URL,
+    /\.vercel\.app$/,
+    /https:\/\/.*\.vercel\.app$/
   ].filter(Boolean),
   credentials: true,
   optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
-
-// Serve static files from frontend directory
-app.use(express.static('../frontend'));
 
 // MongoDB connection
 mongoose.connect(process.env.MONGODB_URI)
@@ -82,30 +82,10 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Handle frontend routes - serve index.html for non-API routes
-app.get('*', (req, res) => {
-  // If it's an API route that doesn't exist, return 404 JSON
-  if (req.path.startsWith('/api/')) {
-    return res.status(404).json({ message: 'Route not found' });
-  }
-  
-  // For all other routes, serve the frontend files
-  res.sendFile('index.html', { root: '../frontend' });
+// Handle 404 for API routes only
+app.use('/api/*', (req, res) => {
+  res.status(404).json({ message: 'API route not found' });
 });
 
-// Start server
-const PORT = process.env.PORT || 5000;
-
-// Export for Vercel serverless deployment
-module.exports = app;
-
-// Start server only if not in Vercel environment
-if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`📍 API URL: http://localhost:${PORT}`);
-    console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
-  });
-}
-
+// Export app for Vercel serverless deployment
 module.exports = app;
